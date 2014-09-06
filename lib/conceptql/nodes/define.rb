@@ -13,9 +13,6 @@ module ConceptQL
     # and then insert that variable into the concept as needed.
     # run the query once and subsequent calls
     class Define < Node
-      def initialize(*args)
-        super
-      end
       # Create a temporary table and store the stream of  results in that table.
       # This "caches" the results so we only have to execute stream's query
       # once.
@@ -60,15 +57,21 @@ module ConceptQL
         db[db.send(:create_table_as_sql, table_name, stream.evaluate(db).sql, temp: true)].sql
       end
 
-      def tree=(tree)
+      def scope=(s)
+        if scope
+          scope.remove_definition(name)
+        end
         super
-        tree.defined[table_name] = self
+        scope.add_definition(name, self)
       end
 
+      def table_name
+        @table_name ||= namify(name)
+      end
       private
 
-      def table_name
-        @table_name ||= namify(arguments.first)
+      def name
+        arguments.first
       end
     end
   end

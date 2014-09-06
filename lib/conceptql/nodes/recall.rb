@@ -33,12 +33,16 @@ module ConceptQL
       end
 
       private
+      def name
+        arguments.first
+      end
+
       def table_name
-        @table_name ||= namify(arguments.first)
+        @table_name ||= definition.table_name
       end
 
       def definition
-        tree.defined[table_name]
+        scope.definitions(name)
       end
     end
   end

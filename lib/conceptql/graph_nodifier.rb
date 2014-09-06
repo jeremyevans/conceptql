@@ -154,13 +154,13 @@ module ConceptQL
       @types ||= {}
     end
 
-    def create(type, values, tree)
+    def create(type, values)
       if BINARY_OPERATOR_TYPES.include?(type)
         return BinaryOperatorNode.new(type, values)
       elsif type == :define
-        return DefineNode.new(type, values).tap { |n| n.tree = self }
+        return DefineNode.new(type, values)
       elsif type == :recall
-        return RecallNode.new(type, values).tap { |n| n.tree = self }
+        return RecallNode.new(type, values)
       elsif type == :vsac
         types = values.pop
         return VsacNode.new(type, values, types)

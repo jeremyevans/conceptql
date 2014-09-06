@@ -13,8 +13,7 @@ module ConceptQL
         :value_as_string,
         :value_as_concept_id
       ]
-      attr :values, :options
-      attr_accessor :tree
+      attr :values, :options, :scope
       def initialize(*args)
         args.flatten!
         if args.last.is_a?(Hash)
@@ -63,6 +62,21 @@ module ConceptQL
                     criterion_type]
         columns += date_columns(query, local_type)
         columns += value_columns(query)
+      end
+
+      def scope=(scope)
+        @scope = scope
+        #puts "#{scope} => #{self}"
+        children.each { |c| c.scope = scope }
+        @scope
+      end
+
+      def to_s
+        "Node: [#{self.class}] - #{values.inspect}"
+      end
+
+      def inspect
+        to_s
       end
 
       private
@@ -196,8 +210,7 @@ module ConceptQL
       end
 
       def namify(name)
-        digest = Zlib.crc32 name
-        ('_' + digest.to_s).to_sym
+        scope.namify(name)
       end
     end
   end

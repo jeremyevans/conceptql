@@ -1,20 +1,27 @@
 require_relative 'nodifier'
+require_relative 'scope'
 require 'active_support/core_ext/hash'
 
 module ConceptQL
   class Tree
-    attr :nodifier, :behavior, :defined
+    attr :nodifier, :behavior, :scope
     def initialize(opts = {})
       @nodifier = opts.fetch(:nodifier, Nodifier.new)
       @behavior = opts.fetch(:behavior, nil)
-      @defined = {}
+      @scope = Scope.new
     end
 
     def root(*queries)
-      @root ||= traverse(queries.flatten.map(&:statement).flatten.map(&:deep_symbolize_keys))
+      @root ||= build(queries)
     end
 
     private
+
+    def build(queries)
+      root = traverse(queries.flatten.map(&:statement).flatten.map(&:deep_symbolize_keys))
+      root.each { |n| n.scope = @scope }
+    end
+
     def traverse(obj)
       case obj
       when Hash
@@ -24,7 +31,7 @@ module ConceptQL
         end
         type = obj.keys.first
         values = traverse(obj[type])
-        obj = nodifier.create(type, values, self)
+        obj = nodifier.create(type, values)
         obj.extend(behavior) if behavior
         obj
       when Array
